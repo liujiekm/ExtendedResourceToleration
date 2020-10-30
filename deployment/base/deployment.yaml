@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pod-toleration-webhook
+  labels:
+    app: pod-toleration-webhook
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pod-toleration-webhook
+  template:
+    metadata:
+      labels:
+        app: pod-toleration-webhook
+    spec:
+      containers:
+        - name: server
+          image: stackrox/admission-controller-webhook-demo:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8443
+              name: pod-toleration-webhook-api
+          volumeMounts:
+            - name: pod-toleration-webhook-tls-certs
+              mountPath: /run/secrets/tls
+              readOnly: true
+      volumes:
+        - name: pod-toleration-webhook-tls-certs
+          secret: pod-toleration-webhook-server-tls

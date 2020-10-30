@@ -1,0 +1,11 @@
+apiVersion: skaffold/v1beta8
+kind: Config
+build:
+  tagPolicy:
+    envTemplate:
+      template: "{{.IMAGE_NAME}}:{{.TAG}}"
+  artifacts:
+    - image: jayprim/pod-toleration-webhook
+      docker:
+        dockerfile: Dockerfile
+  local: {}

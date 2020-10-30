@@ -1,0 +1,17 @@
+apiVersion: admissionregistration.k8s.io/v1beta1
+kind: MutatingWebhookConfiguration
+metadata:
+  name: pod-toleration-webhook
+webhooks:
+  - name: pod-toleration-webhook.kubeflow.svc
+    clientConfig:
+      service:
+        name: pod-toleration-webhook
+        namespace: kubeflow
+        path: "/mutate"
+      caBundle: ${CA_PEM_B64}
+    rules:
+      - operations: [ "CREATE" ]
+        apiGroups: [""]
+        apiVersions: ["v1"]
+        resources: ["pods"]

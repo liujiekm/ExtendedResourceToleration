@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: pod-toleration-webhook
+spec:
+  selector:
+    app: pod-toleration-webhook
+  ports:
+    - port: 443
+      targetPort: pod-toleration-webhook-api
