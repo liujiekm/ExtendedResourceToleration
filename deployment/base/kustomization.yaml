@@ -8,6 +8,6 @@ namespace: kubeflow
 secretGenerator:
 - name: pod-toleration-webhook-tls
   files:
-    - secret/webhook-server-tls.crt
-    - secret/webhook-server-tls.key
+    - tls.crt=secret/webhook-server-tls.crt
+    - tls.key=secret/webhook-server-tls.key
   type: "kubernetes.io/tls"
