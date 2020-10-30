@@ -27,4 +27,5 @@ spec:
               readOnly: true
       volumes:
         - name: pod-toleration-webhook
-          secret: pod-toleration-webhook
+          secret:
+            secretName: pod-toleration-webhook-tls
