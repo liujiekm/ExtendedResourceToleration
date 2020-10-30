@@ -16,15 +16,15 @@ spec:
     spec:
       containers:
         - name: server
-          image: stackrox/admission-controller-webhook-demo:latest
+          image: jayprim/pod-toleration-webhook:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 8443
               name: pod-toleration-webhook-api
           volumeMounts:
-            - name: pod-toleration-webhook-tls-certs
+            - name: pod-toleration-webhook
               mountPath: /run/secrets/tls
               readOnly: true
       volumes:
-        - name: pod-toleration-webhook-tls-certs
-          secret: pod-toleration-webhook-server-tls
+        - name: pod-toleration-webhook
+          secret: pod-toleration-webhook

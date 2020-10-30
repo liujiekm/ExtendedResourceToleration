@@ -5,3 +5,9 @@ resources:
 - deployment.yaml
 - service.yaml
 namespace: kubeflow
+secretGenerator:
+- name: pod-toleration-webhook
+  files:
+    - secret/webhook-server-tls.cert
+    - secret/webhook-server-tls.key
+  type: "kubernetes.io/tls"
