@@ -20,7 +20,7 @@ spec:
           imagePullPolicy: Always
           ports:
             - containerPort: 8443
-              name: pod-toleration-webhook-api
+              name: webhook-api
           volumeMounts:
             - name: pod-toleration-webhook
               mountPath: /run/secrets/tls

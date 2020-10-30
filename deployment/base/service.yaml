@@ -7,4 +7,4 @@ spec:
     app: pod-toleration-webhook
   ports:
     - port: 443
-      targetPort: pod-toleration-webhook-api
+      targetPort: webhook-api
