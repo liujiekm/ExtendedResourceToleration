@@ -14,6 +14,8 @@ import (
 	"k8s.io/apimachinery/pkg/util/sets"
 	"k8s.io/kubernetes/pkg/apis/core"
 
+	corev1 "k8s.io/api/core/v1"
+
 )
 
 const (
@@ -38,7 +40,7 @@ func applyToleration(req *v1beta1.AdmissionRequest) ([]patchOperation, error) {
 
 	// Parse the Pod object.
 	raw := req.Object.Raw
-	pod := core.Pod{}
+	pod := corev1.Pod{}
 	if _, _, err := universalDeserializer.Decode(raw, nil, &pod); err != nil {
 		return nil, fmt.Errorf("could not deserialize pod object: %v", err)
 	}
@@ -47,36 +49,38 @@ func applyToleration(req *v1beta1.AdmissionRequest) ([]patchOperation, error) {
 	resources := sets.String{}
 
 	for _,container := range pod.Spec.Containers{
+		log.Printf("container:%v",container)
 		for resourceName:= range container.Resources.Requests{
 
-			log.Printf("find resource name:%s in container:%s -- is extended resource name:%v", resourceName,container.Name,helper.IsExtendedResourceName(resourceName))
-			if helper.IsExtendedResourceName(resourceName){
+			//log.Printf("find resource name:%s in container:%s -- is extended resource name:%v", resourceName,container.Name,helper.IsExtendedResourceName(resourceName))
+			//if helper.IsExtendedResourceName(resourceName){
 				resources.Insert(string(resourceName))
-			}
+			//}
 
 		}
 		for resourceName:= range container.Resources.Limits{
 
-			log.Printf("find resource name:%s in container:%s -- is extended resource name:%v", resourceName,container.Name,helper.IsExtendedResourceName(resourceName))
-			if helper.IsExtendedResourceName(resourceName){
+			//log.Printf("find resource name:%s in container:%s -- is extended resource name:%v", resourceName,container.Name,helper.IsExtendedResourceName(resourceName))
+			//if helper.IsExtendedResourceName(resourceName){
 				resources.Insert(string(resourceName))
-			}
+			//}
 
 		}
 	}
 
 	for _,container := range pod.Spec.InitContainers{
+		log.Printf("init container:%v",container)
 		for resourceName:= range container.Resources.Requests{
-			log.Printf("find resource name:%s in init container:%s -- is extended resource name:%v", resourceName,container.Name,helper.IsExtendedResourceName(resourceName))
-			if helper.IsExtendedResourceName(resourceName){
+			//log.Printf("find resource name:%s in init container:%s -- is extended resource name:%v", resourceName,container.Name,helper.IsExtendedResourceName(resourceName))
+			//if helper.IsExtendedResourceName(resourceName){
 				resources.Insert(string(resourceName))
-			}
+			//}
 		}
 		for resourceName:= range container.Resources.Limits{
-			log.Printf("find resource name:%s in init container:%s -- is extended resource name:%v", resourceName,container.Name,helper.IsExtendedResourceName(resourceName))
-			if helper.IsExtendedResourceName(resourceName){
+			//log.Printf("find resource name:%s in init container:%s -- is extended resource name:%v", resourceName,container.Name,helper.IsExtendedResourceName(resourceName))
+			//if helper.IsExtendedResourceName(resourceName){
 				resources.Insert(string(resourceName))
-			}
+			//}
 		}
 	}
 
@@ -85,11 +89,11 @@ func applyToleration(req *v1beta1.AdmissionRequest) ([]patchOperation, error) {
 	// This allows us to test adding tolerations for multiple extended resources.
 	tolerations:=[]string{}
 	for _, resource := range resources.List() {
-		helper.AddOrUpdateTolerationInPod(&pod, &core.Toleration{
-			Key:      resource,
-			Operator: core.TolerationOpExists,
-			Effect:   core.TaintEffectNoSchedule,
-		})
+		//helper.AddOrUpdateTolerationInPod(&pod, &core.Toleration{
+		//	Key:      resource,
+		//	Operator: core.TolerationOpExists,
+		//	Effect:   core.TaintEffectNoSchedule,
+		//})
 
 		tolerations = append(tolerations,"{\"key\":"+resource+",\"operator\":"+string(core.TolerationOpExists)+",\"effect\":"+string(core.TaintEffectNoSchedule)+"}")
 
