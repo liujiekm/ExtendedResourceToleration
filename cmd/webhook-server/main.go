@@ -4,13 +4,15 @@ import (
 
 	"fmt"
 	"k8s.io/api/admission/v1beta1"
+	"k8s.io/kubernetes/pkg/apis/core/helper"
+
 	//corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"strings"
 	"log"
 	"net/http"
 	"path/filepath"
-	//"k8s.io/kubernetes/pkg/apis/core/helper"
+	"k8s.io/kubernetes/pkg/apis/core/helper"
 	"k8s.io/apimachinery/pkg/util/sets"
 	"k8s.io/kubernetes/pkg/apis/core"
 
@@ -45,42 +47,37 @@ func applyToleration(req *v1beta1.AdmissionRequest) ([]patchOperation, error) {
 		return nil, fmt.Errorf("could not deserialize pod object: %v", err)
 	}
 
-	log.Printf("pod:%v",pod)
 	resources := sets.String{}
 
 	for _,container := range pod.Spec.Containers{
-		log.Printf("container:%v",container)
+
 		for resourceName:= range container.Resources.Requests{
 
-			//log.Printf("find resource name:%s in container:%s -- is extended resource name:%v", resourceName,container.Name,helper.IsExtendedResourceName(resourceName))
-			//if helper.IsExtendedResourceName(resourceName){
+			if helper.IsExtendedResourceName(core.ResourceName(string(resourceName))){
 				resources.Insert(string(resourceName))
-			//}
+			}
 
 		}
 		for resourceName:= range container.Resources.Limits{
 
-			//log.Printf("find resource name:%s in container:%s -- is extended resource name:%v", resourceName,container.Name,helper.IsExtendedResourceName(resourceName))
-			//if helper.IsExtendedResourceName(resourceName){
+			if helper.IsExtendedResourceName(core.ResourceName(string(resourceName))){
 				resources.Insert(string(resourceName))
-			//}
+			}
 
 		}
 	}
 
 	for _,container := range pod.Spec.InitContainers{
-		log.Printf("init container:%v",container)
+
 		for resourceName:= range container.Resources.Requests{
-			//log.Printf("find resource name:%s in init container:%s -- is extended resource name:%v", resourceName,container.Name,helper.IsExtendedResourceName(resourceName))
-			//if helper.IsExtendedResourceName(resourceName){
+			if helper.IsExtendedResourceName(core.ResourceName(string(resourceName))){
 				resources.Insert(string(resourceName))
-			//}
+			}
 		}
 		for resourceName:= range container.Resources.Limits{
-			//log.Printf("find resource name:%s in init container:%s -- is extended resource name:%v", resourceName,container.Name,helper.IsExtendedResourceName(resourceName))
-			//if helper.IsExtendedResourceName(resourceName){
+			if helper.IsExtendedResourceName(core.ResourceName(string(resourceName))){
 				resources.Insert(string(resourceName))
-			//}
+			}
 		}
 	}
 
@@ -95,7 +92,7 @@ func applyToleration(req *v1beta1.AdmissionRequest) ([]patchOperation, error) {
 		//	Effect:   core.TaintEffectNoSchedule,
 		//})
 
-		tolerations = append(tolerations,"{\"key\":"+resource+",\"operator\":"+string(core.TolerationOpExists)+",\"effect\":"+string(core.TaintEffectNoSchedule)+"}")
+		tolerations = append(tolerations,"{\"key\":\""+resource+"\",\"operator\":\""+string(core.TolerationOpExists)+"\",\"effect\":\""+string(core.TaintEffectNoSchedule)+"\"}")
 
 	}
 
@@ -103,7 +100,7 @@ func applyToleration(req *v1beta1.AdmissionRequest) ([]patchOperation, error) {
 	patches = append(patches, patchOperation{
 		Op:    "add",
 		Path:  "/spec/tolerations",
-		Value: "["+strings.Join(tolerations,"")+"]",
+		Value: "["+strings.Join(tolerations,",")+"]",
 	})
 	// Retrieve the `runAsNonRoot` and `runAsUser` values.
 	//var runAsNonRoot *bool
