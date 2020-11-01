@@ -43,7 +43,7 @@ func applyToleration(req *v1beta1.AdmissionRequest) ([]patchOperation, error) {
 		return nil, fmt.Errorf("could not deserialize pod object: %v", err)
 	}
 
-
+	log.Printf("pod:%v",pod)
 	resources := sets.String{}
 
 	for _,container := range pod.Spec.Containers{
@@ -55,10 +55,24 @@ func applyToleration(req *v1beta1.AdmissionRequest) ([]patchOperation, error) {
 			}
 
 		}
+		for resourceName:= range container.Resources.Limits{
+
+			log.Printf("find resource name:%s in container:%s -- is extended resource name:%v", resourceName,container.Name,helper.IsExtendedResourceName(resourceName))
+			if helper.IsExtendedResourceName(resourceName){
+				resources.Insert(string(resourceName))
+			}
+
+		}
 	}
 
 	for _,container := range pod.Spec.InitContainers{
 		for resourceName:= range container.Resources.Requests{
+			log.Printf("find resource name:%s in init container:%s -- is extended resource name:%v", resourceName,container.Name,helper.IsExtendedResourceName(resourceName))
+			if helper.IsExtendedResourceName(resourceName){
+				resources.Insert(string(resourceName))
+			}
+		}
+		for resourceName:= range container.Resources.Limits{
 			log.Printf("find resource name:%s in init container:%s -- is extended resource name:%v", resourceName,container.Name,helper.IsExtendedResourceName(resourceName))
 			if helper.IsExtendedResourceName(resourceName){
 				resources.Insert(string(resourceName))
