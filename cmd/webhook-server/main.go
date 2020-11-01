@@ -12,7 +12,7 @@ import (
 	"log"
 	"net/http"
 	"path/filepath"
-	"k8s.io/kubernetes/pkg/apis/core/helper"
+
 	"k8s.io/apimachinery/pkg/util/sets"
 	"k8s.io/kubernetes/pkg/apis/core"
 
