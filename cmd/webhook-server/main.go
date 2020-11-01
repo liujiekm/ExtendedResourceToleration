@@ -92,7 +92,7 @@ func applyToleration(req *v1beta1.AdmissionRequest) ([]patchOperation, error) {
 		//	Effect:   core.TaintEffectNoSchedule,
 		//})
 
-		tolerations = append(tolerations,"{\"key\":\""+resource+"\",\"operator\":\""+string(core.TolerationOpExists)+"\",\"effect\":\""+string(core.TaintEffectNoSchedule)+"\"}")
+		tolerations = append(tolerations,"{key:"+resource+",operator:"+string(core.TolerationOpExists)+",effect:"+string(core.TaintEffectNoSchedule)+"}")
 
 	}
 
@@ -100,7 +100,8 @@ func applyToleration(req *v1beta1.AdmissionRequest) ([]patchOperation, error) {
 	patches = append(patches, patchOperation{
 		Op:    "add",
 		Path:  "/spec/tolerations",
-		Value: "["+strings.Join(tolerations,",")+"]",
+		//Value: "["+strings.Join(tolerations,",")+"]",
+		Value: tolerations,
 	})
 	// Retrieve the `runAsNonRoot` and `runAsUser` values.
 	//var runAsNonRoot *bool
