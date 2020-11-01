@@ -6,7 +6,7 @@ import (
 	"k8s.io/api/admission/v1beta1"
 	//corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
+	"strings"
 	"log"
 	"net/http"
 	"path/filepath"
@@ -48,6 +48,8 @@ func applyToleration(req *v1beta1.AdmissionRequest) ([]patchOperation, error) {
 
 	for _,container := range pod.Spec.Containers{
 		for resourceName:= range container.Resources.Requests{
+
+			log.Printf("find resource name:%s in container:%s -- is extended resource name:%v", resourceName,container.Name,helper.IsExtendedResourceName(resourceName))
 			if helper.IsExtendedResourceName(resourceName){
 				resources.Insert(string(resourceName))
 			}
@@ -57,28 +59,34 @@ func applyToleration(req *v1beta1.AdmissionRequest) ([]patchOperation, error) {
 
 	for _,container := range pod.Spec.InitContainers{
 		for resourceName:= range container.Resources.Requests{
+			log.Printf("find resource name:%s in init container:%s -- is extended resource name:%v", resourceName,container.Name,helper.IsExtendedResourceName(resourceName))
 			if helper.IsExtendedResourceName(resourceName){
 				resources.Insert(string(resourceName))
 			}
 		}
 	}
 
-	var patches []patchOperation
+	patches:= []patchOperation{}
 	// Doing .List() so that we get a stable sorted list.
 	// This allows us to test adding tolerations for multiple extended resources.
+	tolerations:=[]string{}
 	for _, resource := range resources.List() {
 		helper.AddOrUpdateTolerationInPod(&pod, &core.Toleration{
 			Key:      resource,
 			Operator: core.TolerationOpExists,
 			Effect:   core.TaintEffectNoSchedule,
 		})
-		patches = append(patches, patchOperation{
-			Op:    string(core.TolerationOpExists),
-			Path:  resource,
-			Value: string(core.TaintEffectNoSchedule),
-		})
+
+		tolerations = append(tolerations,"{\"key\":"+resource+",\"operator\":"+string(core.TolerationOpExists)+",\"effect\":"+string(core.TaintEffectNoSchedule)+"}")
+
 	}
 
+	log.Printf("tolerations:%v",tolerations)
+	patches = append(patches, patchOperation{
+		Op:    "add",
+		Path:  "/spec/tolerations",
+		Value: "["+strings.Join(tolerations,"")+"]",
+	})
 	// Retrieve the `runAsNonRoot` and `runAsUser` values.
 	//var runAsNonRoot *bool
 	//var runAsUser *int64
