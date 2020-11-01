@@ -84,7 +84,9 @@ func applyToleration(req *v1beta1.AdmissionRequest) ([]patchOperation, error) {
 	patches:= []patchOperation{}
 	// Doing .List() so that we get a stable sorted list.
 	// This allows us to test adding tolerations for multiple extended resources.
-	tolerations:=[]string{}
+	tolerations:=[]corev1.Toleration{}
+
+
 	for _, resource := range resources.List() {
 		//helper.AddOrUpdateTolerationInPod(&pod, &core.Toleration{
 		//	Key:      resource,
@@ -92,8 +94,12 @@ func applyToleration(req *v1beta1.AdmissionRequest) ([]patchOperation, error) {
 		//	Effect:   core.TaintEffectNoSchedule,
 		//})
 
-		tolerations = append(tolerations,"{key:"+resource+",operator:"+string(core.TolerationOpExists)+",effect:"+string(core.TaintEffectNoSchedule)+"}")
-
+		//tolerations = append(tolerations,"{key:"+resource+",operator:"+string(core.TolerationOpExists)+",effect:"+string(core.TaintEffectNoSchedule)+"}")
+		tolerations = append(tolerations,corev1.Toleration{
+			Key:resource,
+			Operator:corev1.TolerationOpExists,
+			Effect:corev1.TaintEffectNoSchedule,
+		})
 	}
 
 	log.Printf("tolerations:%v",tolerations)
